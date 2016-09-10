@@ -1,0 +1,17 @@
+ ###ALTERA CONTEUDO DE ARQUIVOS###
+$Search = Read-Host -prompt "Insira a string a PESQUISAR."
+$Replace = Read-Host "Insira a string que MODIFICARÁ a string pesquisada."
+#$Path = Read-Host "Insira o caminho completo aonde estão os arquivos a serem alterados."
+$GetFiles = Get-ChildItem
+$Files = $GetFiles.Name
+
+
+ForEach ($File in $Files)
+
+{
+
+Get-Content $File | ForEach-Object { $_ -replace $Search , $Replace } | Set-Content ($File+".tmp")
+Remove-Item $File
+Rename-Item ($File+".tmp") $File
+
+} 

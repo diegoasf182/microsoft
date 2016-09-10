@@ -5,7 +5,7 @@ Import-Module ActiveDirectory
 
 Write-Host "Variaveis de Entrada"
 [int]$NumberLOJA = Read-Host "Digite o Numero da Loja com 3 digitos Ex(050)"
-$NameLoja = Read-Host "Digite o Nome da Loja Ex:(Anália Franco)"
+$NameLoja = Read-Host "Digite o Nome da Loja Ex:(Analia Franco)"
 
 ########################## Concatena Numero da Loja + Nome ######################
 

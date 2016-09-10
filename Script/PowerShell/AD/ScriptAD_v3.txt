@@ -1,0 +1,141 @@
+﻿####Script Automatização OU#####
+Set-ExecutionPolicy Unrestricted
+Import-Module ActiveDirectory
+################################################################################
+Write-Host "Variaveis de Entrada"
+[int]$NumberLOJA = Read-Host "Digite o Numero da Loja com 3 digitos Ex(050)"
+$NameLoja = Read-Host "Digite o Nome da Loja Ex:(Anália Franco)"
+
+##########################Concatena Numero da Loja + Nome ######################
+if ($NumberLOJA -lt 100){
+                            [string]$NumberLOJA="0"+$NumberLOJA
+                        }
+$FullnameLoja = "$NumberLOJA - $NameLoja"
+
+
+#####################Caminho OUs###############################################
+$PathOUBASELOJAS = "OU=SARAIVA,OU=LOJAS,OU=Varejo,DC=SARAIVA,DC=CORP"
+$PathOU = "OU=$FullnameLoja,OU=SARAIVA,OU=LOJAS,OU=Varejo,DC=SARAIVA,DC=CORP"
+
+
+#####################Verifica se existe OU RAIZ LOJA#########################################################################
+Function CheckOURaiz {
+                        $script:OUpathraiz = "$PathOU"
+                        $Statusraiz = $false
+                        $GetOUraiz = Get-ADOrganizationalUnit -Filter "distinguishedName -eq '$OUPathraiz'"
+    
+                        if ($GetOUraiz -eq $null) {
+                                                        $statusraiz = $false
+                                                        Write-Host -ForegroundColor Red "$OUpathraiz OU não Existe." 
+                                                  } else {
+                                                            $Statusraiz = $true
+                                                            Write-Host -ForegroundColor Green "$OUpathraiz OU já Existe!"
+                                                         }
+                        return $Statusraiz
+                     }
+
+$OUStatusraiz = CheckOURaiz
+
+                        if ($OUStatusraiz -eq $true) {
+                                                        Write-Host " A OU da loja $FullnameLoja já Existe"
+#################################### Verfica a existencia da OU Usuarios###################################################################################################
+                                                        Function CheckOUUsers {
+                                                                                    $script:OUpathusers = "OU=Usuarios,$PathOU"
+                                                                                    $Statususers = $false
+                                                                                    $GetOUusers = Get-ADOrganizationalUnit -Filter "distinguishedName -eq '$OUPathusers'"
+                                                                                    if ($GetOUusers -eq $null) {
+                                                                                                                    $statususers = $false
+                                                                                                                    Write-Host -ForegroundColor Red "$OUpathusers OU não Existe." 
+                                                                                                               } else {
+                                                                                                                            $Statususers = $true
+                                                                                                                            Write-Host -ForegroundColor Green "$OUpathusers OU já Existe!"
+                                                                                                                      }
+                                                                                    return $Statususers
+                                                                              }
+
+                                                        $OUStatususers = CheckOUusers
+                                                        if ($OUStatususers -eq $true) {
+                                                                                            Write-Host "A OU Usuarios da loja $FullnameLoja já existe"
+################################### Verifique a existencia da OU PDV dentro de Usuarios###################################################################################
+                                                                                            Function CheckOUpdv {
+                                                                                                                    $script:OUpathpdv = "OU=PDV,OU=Usuarios,$PathOU"
+                                                                                                                    $Statuspdv = $false
+                                                                                                                    $GetOUpdv = Get-ADOrganizationalUnit -Filter "distinguishedName -eq '$OUPathpdv'"    
+                                                                                                                    if ($GetOUpdv -eq $null) {
+                                                                                                                                                 $statuspdv = $false
+                                                                                                                                                 Write-Host -ForegroundColor Red "$OUpathpdv OU não Existe." 
+                                                                                                                                             }      else {
+                                                                                                                                                                $Statuspdv = $true
+                                                                                                                                                                Write-Host -ForegroundColor Green "$OUpathpdv OU já Existe!"
+                                                                                                                                                          }
+                                                                                                                    return $Statuspdv
+                                                                                                                }
+
+                                                                                            $OUStatuspdv = CheckOUpdv
+                                                                                            if ($OUStatuspdv -eq $true) {
+                                                                                                                            Write-Host "$OUpathpdv OU Existe"
+                                                                                                                        } else {
+                                                                                                                                    Write-Host "$OUpathpdv OU Não Existe"
+                                                                                                                                    $CreateOUUserspdv = Read-Host "Deseja Criar a OU PDV para a Loja $FullnameLoja 1-Sim ou 2-Nao?"
+                                                                                                                                    if($CreateOUUserspdv -eq 1) {
+                                                                                                                                                                        New-ADOrganizationalUnit  -Name PDV -Path "OU=Usuarios,$PathOU"
+                                                                                                                                                                        Write-Host "OU PDV Criada com Sucesso!"
+                                                                                                                                                                }
+                                                                                                                               }          
+                                                                                        }                                                                                    
+###########################################Verifica a existencia da OU Desktops####################################################################################################################################
+                                                        Function CheckOUDesks {
+                                                                                    $script:OUpathDesks = "OU=Desktops,$PathOU"
+                                                                                    $StatusDesks = $false
+                                                                                    $GetOUDesks = Get-ADOrganizationalUnit -Filter "distinguishedName -eq '$OUPathDesks'"
+                                                                                    if ($GetOUDesks -eq $null) {
+                                                                                                                    $statusDesks = $false
+                                                                                                                    Write-Host -ForegroundColor Red "$OUpathDesks OU não Existe." 
+                                                                                                               } else {
+                                                                                                                            $StatusDesks = $true
+                                                                                                                            Write-Host -ForegroundColor Green "$OUpathDesks OU já Existe!"
+                                                                                                                      }
+                                                                                    return $StatusDesks
+                                                                              }
+
+                                                        $OUStatusDesks = CheckOUDesks
+                                                        if ($OUStatusDesks -eq $true) {
+                                                                                            Write-Host "A OU Desktops da loja $FullnameLoja já existe"
+################################### Verifique a existencia da OU PDVDESK dentro de Desktops###################################################################################
+                                                                                            Function CheckOUPDVDESK {
+                                                                                                                    $script:OUpathPDVDESK = "OU=PDVDESK,OU=Usuarios,$PathOU"
+                                                                                                                    $StatusPDVDESK = $false
+                                                                                                                    $GetOUPDVDESK = Get-ADOrganizationalUnit -Filter "distinguishedName -eq '$OUPathPDVDESK'"    
+                                                                                                                    if ($GetOUPDVDESK -eq $null) {
+                                                                                                                                                 $statusPDVDESK = $false
+                                                                                                                                                 Write-Host -ForegroundColor Red "$OUpathPDVDESK OU não Existe." 
+                                                                                                                                             }      else {
+                                                                                                                                                                $StatusPDVDESK = $true
+                                                                                                                                                                Write-Host -ForegroundColor Green "$OUpathPDVDESK OU já Existe!"
+                                                                                                                                                          }
+                                                                                                                    return $StatusPDVDESK
+                                                                                                                }
+
+                                                                                            $OUStatusPDVDESK = CheckOUPDVDESK
+                                                                                            if ($OUStatusPDVDESK -eq $true) {
+                                                                                                                            Write-Host "$OUpathPDVDESK OU Existe"
+                                                                                                                        } else {
+                                                                                                                                    Write-Host "$OUpathPDVDESK OU Não Existe"
+                                                                                                                                    $CreateOUDesksPDVDESK = Read-Host "Deseja Criar a OU PDVDESK para a Loja $FullnameLoja 1-Sim ou 2-Nao?"
+                                                                                                                                    if($CreateOUDesksPDVDESK -eq 1) {
+                                                                                                                                                                        New-ADOrganizationalUnit  -Name PDVDESK -Path "OU=Desktops,$PathOU"
+                                                                                                                                                                        Write-Host "OU PDVDESK Criada com Sucesso!"
+                                                                                                                                                                }
+                                                                                                                               }          
+                                                                                        }
+#############################################CRIA OU RAIZ###########################################################################################################################################################
+                                              } else {
+                                                            Write-Host " A OU da loja $FullnameLoja Não Existe"
+                                                            $CreateOURaiz = Read-Host "Deseja Criar a OU para a Loja $FullnameLoja 1-Sim ou 2-Nao?"
+                                                                                                   if($CreateOURaiz -eq 1) {
+                                                                                                                                    New-ADOrganizationalUnit  -Name $FullnameLoja -Path "OU=Usuarios,$PathOUBASELOJAS"
+                                                                                                                                    Write-Host "OU PDV Criada com Sucesso!"
+                                                                                                                            }
+
+
+                                                     }
